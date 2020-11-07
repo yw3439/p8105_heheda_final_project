@@ -1,0 +1,32 @@
+---
+title: "Boston Crime Analysis"
+author: "Qetsiyah Wang"
+date: "11/7/2020"
+output: github_document
+---
+
+# Project Proposal
+
+1. Group Members:
+   Yue Chen yc3731, Shunyi Zhang Sz2872, Qianhui Xu qx2199, Qetsiyah Wang yw3439
+  
+2. The tentative project title
+   Analysis of Crime in Boston from 2015 to 2018.
+
+3. As Boston is proceeding to more developed city, the amount of crime also increases. Considering the oublic safety also plays a vital role in public health, general societal analysis of crimes occuring in a city is essential for preventing more and even cruel crimes happening and stabilizing security of the whole city. 
+
+4. The intended final products will be monitored by analyzing different potential indicators of crimes, such as, locations (ie,. which locations might more crimes take place?) or time (ie,. when did crime show high frequency?)
+
+5. The anticipated data resources is "crime.csv", which is the most updated version to current date, provided by Analyze Boston. 
+
+6. The planned analyses: Crime vs.Locations (map plot), crime frequency (distribution), etc. (We will utilize r.shiny or plotly for generating data plots.) 
+   Coding challenges: Codebook replacements and different vectors enter for one variable.
+   
+7. The planned timeline:
+   11/14: Finish Tidydata
+   11/21: Finish generating plots
+   11/28: Finish summary report for the whole project.
+   12/01: Discuss with TA/Jeff for evaluating project.
+   12/06: Final commit for the whole project.
+
+
