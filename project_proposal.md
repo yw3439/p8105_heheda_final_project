@@ -1,0 +1,58 @@
+Boston Crime Analysis
+================
+Qetsiyah Wang
+11/7/2020
+
+# Project Proposal
+
+1.  Group Members: Yue Chen yc3731, Shunyi Zhang sz2872, Qianhui Xu
+    qx2199, Qetsiyah Wang yw3439
+
+2.  The tentative project title Analysis of Eating and Health Module
+    Data
+
+3.  As one of essential indicators for the health quality, personal
+    eating habits strongly impact one’s health condition in positive or
+    opposite direction. In other words, healthy eating, including normal
+    eating habits, food quality, regular eating schedules, contributes
+    to personal BMI that associates with versatile chronic diseases if
+    beyond or below the normal range with for a long term.
+
+4.  The intended final dataset will be monitored by analyzing different
+    potential indicators. From personal income levels and accessibility
+    to grocery stores, external factors impacts on eating habits can be
+    analyzed. Also, how do internal factors, including physical
+    activities and drinking habits, correlate with personal eating? By
+    exploiting personal BMI and physical health as indicators, we can
+    explore the association between eating habits and health.
+
+5.  The anticipated data resources is “ehresp.csv”, which is collected
+    by questionaire for supporting foor and nutrition programs ,
+    provided by United States Department of Agriculture and downloaded
+    from U.S Bureau of Labor Statistics.
+
+6.  The planned analyses:
+    
+    1.  Coding Challenges: the original dataset contains too many
+        unrecognizable variables names. And most of variables are
+        logical variables, which need to be tidied. There are 35 columns
+        and only several meaningful variables would be kept in the final
+        dataset analysis. For all analysis, eating patterns will be
+        monitored through personal BMI index and physical health score.
+    2.  Measure impacts of external factors on eating patterns: incomes,
+        grocery stores, household conditions.
+    3.  Measure impacts of internal factors on eating patterns: mean
+        contents, eating schedules, physical activities.
+    4.  All statistical analysis will be utilized with plots (ggplot or
+        plotly). Hypothesis tests will be used for analyzing primary and
+        secondary eating habits along with physical health as
+        indicators. Regression models is still under consideration as
+        part of analysis for measuring inter-relationship within
+        indicators.
+
+7.  The planned timeline: 11/18: Finish Tidydata and related plots.
+    11/25: First complete statistical analysis for the dataset,
+    including plots analysises, hypothesis test and possible regression
+    model. 12/01: Finish summary report for the whole project. 12/02:
+    Discuss with TA/Jeff for evaluating project. 12/05: Final commit for
+    the whole project.
