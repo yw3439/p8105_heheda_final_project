@@ -31,3 +31,20 @@ output: github_document
    12/01: Finish summary report for the whole project.
    12/02: Discuss with TA/Jeff for evaluating project.
    12/05: Final commit for the whole project.
+   
+
+8. a.	Descriptive Stats for samples: bmi(ERBMI), height(EUGHT), weight(EUWGT), Income(ERINCOME)
+      - Simple descriptive stats: tables
+
+   b. Factors:
+      - BMI + physcial health: simple descriptive plots about association (ERBMI + EUGENHTH)
+      - External:
+        - Income + BMI (ERINCOME + ERBMI) - plot
+        - Groceries + BMI (EUSTORES + ERBMI) - Plot
+
+      - Internal:
+        - Multiple Regression Model: BMI + Physical Activities(QUEXFREQ) + Fast Food(QUFASTFDFRQ)
+   
+   c. Hypothesis Test:
+      - Primary Eating and Secondary eating: paired T-test (ERTPREAT, ERTSEAT)
+
