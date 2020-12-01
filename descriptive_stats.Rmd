@@ -1,0 +1,46 @@
+---
+title: "Eating habits"
+author: "Yue Chen"
+date: "11/29/20"
+output: github_document
+---
+ 
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(pastecs)
+```
+
+```{r}
+ehresp = read.csv("ehresp_2014.csv")
+```
+The dataset contains `r nrow(ehresp)` responses and `r ncol(ehresp)` variables. We will examine bmi as an outcome variable, and how factors such as income level, exercise frequency, access to grocery stores, primary eating time, and secondary eating time, contribute to bmi.
+
+## Descriptive statistics
+
+Income.
+```{r}
+ehresp %>%
+   filter(erincome > 0) %>%
+   group_by(erincome) %>%
+   summarise(n_distinct(tucaseid)) %>%
+   mutate(
+      income_level = case_when(
+         erincome == 1 ~ "Income > 185% of poverty threshold", 
+         erincome == 2 ~ "Income <= 185% of poverty threshold", 
+         erincome == 3 ~ "130% of poverty threshold < Income < 185% of poverty threshold", 
+         erincome == 4 ~ "Income > 130% of poverty threshold",
+         erincome == 5 ~ "Income <= 130% of poverty threshold"))
+```
+
+BMI, height in inches, and weight in pounds.
+```{r}
+ehresp %>%
+   select(erbmi, euhgt, euwgt) %>%
+   filter(erbmi > 0, euhgt > 0, euwgt > 0) %>%
+   summary() %>%
+   format(scientific = F, digits = 2)
+```
+
