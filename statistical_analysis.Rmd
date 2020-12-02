@@ -1,0 +1,67 @@
+---
+title: "stats_analysis"
+author: "Qetsiyah Wang"
+date: "12/2/2020"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE,
+                      fig.height = 6, fig.width = 8)
+
+library(tidyverse)
+library(dplyr)
+library(DescTools)
+```
+
+  This RMD file mainly focuses on statistical analysis for internal indicators: participants' consumption frequence on fast food and exercise frequency, and their interactions with bmi that would be used as the parameter for eating health. The whole part will be divided as three portions: scatter plots of two indicators vs. erbmi, multiple regression model between two indicators and bmi, and analysis adjustment if needed.
+  
+  
+## Tidy Dataset for internal indicators
+```{r}
+
+internal_indicators = raw_eathealth %>%
+  select(erbmi, eugenhth, eufastfdfrq, euexfreq) %>%
+  filter_all(all_vars(. > 0)) %>%
+  rename("physical_health" = "eugenhth") %>%
+  mutate(
+    physical_health = factor(physical_health, labels = c("Excellent", "Very Good", "Good", "Fair", "Poor")))
+
+```
+
+## Scatter plots of two internal indicators vs. BMI between each physical health group.
+```{r}
+
+bmi_fastfd_model = lm(erbmi ~ eufastfdfrq, data = internal_indicators)
+
+bmi_exercise_model = lm(erbmi ~ euexfreq, data = internal_indicators)
+
+bmi_fastfd = internal_indicators %>%
+  plot_ly(x = ~ eufastfdfrq, y = ~ erbmi, type = "scatter", color = ~ physical_health, 
+          frame = ~ physical_health) %>%
+  add_trace(y = fitted(bmi_fastfd_model), mode = "lines") %>%
+  animation_opts(1000, easing = "linear", redraw = TRUE)
+
+bmi_exercise = internal_indicators %>%
+  plot_ly(x = ~ euexfreq, y = ~ erbmi, type = "scatter", color = ~ physical_health, 
+          frame = ~ physical_health, colors = "Paired") %>%
+  add_trace(y = fitted(bmi_exercise_model), mode = "lines") %>%
+  animation_opts(1000, easing = "linear", redraw = TRUE)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
