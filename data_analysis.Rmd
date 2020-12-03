@@ -59,26 +59,11 @@ external_indicators = raw_eathealth %>%
   )
 
 internal_indicators = raw_eathealth %>%
-  select(erbmi, eufastfdfrq, euexfreq) %>%
-  filter_all(all_vars(. > 0))
-
-```
-
-### Multiple Regression Models
-
-```{r}
-mlr_model = lm(internal_indicators$erbmi ~ internal_indicators$eufastfdfrq)
-mlr_plot_check = plot_ly(internal_indicators, y = ~ erbmi)
-
-mlr_plot_check = mlr_plot_check %>%
-  add_trace(x = ~ eufastfdfrq,  name = "fast_food",
-          marker = list(size = 5, color = "rgba(135, 206, 235, 0.9)")) %>%
-  add_lines(x = ~ eufastfdfrq, y = fitted(mlr_model))
-
-mlr_plot_check = mlr_plot_check %>%
-  add_trace(x = ~ euexfreq, name = "exercise", marker = list(size = 5, color = "rgba(255, 182, 193, 0.8)"))
-
-mlr_plot_check
+  select(erbmi, eugenhth, eufastfdfrq, euexfreq) %>%
+  filter_all(all_vars(. > 0)) %>%
+  rename("physical_health" = "eugenhth") %>%
+  mutate(
+    physical_health = factor(physical_health, labels = c("Excellent", "Very Good", "Good", "Fair", "Poor")))
 
 ```
 

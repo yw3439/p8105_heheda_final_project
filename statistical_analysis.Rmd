@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE,
 library(tidyverse)
 library(dplyr)
 library(DescTools)
+library(plotly)
 ```
 
   This RMD file mainly focuses on statistical analysis for internal indicators: participants' consumption frequence on fast food and exercise frequency, and their interactions with bmi that would be used as the parameter for eating health. The whole part will be divided as three portions: scatter plots of two indicators vs. erbmi, multiple regression model between two indicators and bmi, and analysis adjustment if needed.
@@ -23,45 +24,45 @@ library(DescTools)
 ```{r}
 
 internal_indicators = raw_eathealth %>%
-  select(erbmi, eugenhth, eufastfdfrq, euexfreq) %>%
-  filter_all(all_vars(. > 0)) %>%
-  rename("physical_health" = "eugenhth") %>%
-  mutate(
-    physical_health = factor(physical_health, labels = c("Excellent", "Very Good", "Good", "Fair", "Poor")))
+  select(erbmi, eufastfdfrq, euexfreq) %>%
+  filter_all(all_vars(. > 0))
 
 ```
 
-## Scatter plots of two internal indicators vs. BMI between each physical health group.
+## Scatter plots of BMI vs. Frequency of Fast Food Consumption and Exercise
+
+  
+
+
 ```{r}
 
-bmi_fastfd_model = lm(erbmi ~ eufastfdfrq, data = internal_indicators)
+round(cor(internal_indicators), 3)
 
-bmi_exercise_model = lm(erbmi ~ euexfreq, data = internal_indicators)
+mlr_model = lm(erbmi ~ eufastfdfrq + euexfreq, data = internal_indicators)
+summary(mlr_model)
 
-bmi_fastfd = internal_indicators %>%
-  plot_ly(x = ~ eufastfdfrq, y = ~ erbmi, type = "scatter", color = ~ physical_health, 
-          frame = ~ physical_health) %>%
-  add_trace(y = fitted(bmi_fastfd_model), mode = "lines") %>%
-  animation_opts(1000, easing = "linear", redraw = TRUE)
-
-bmi_exercise = internal_indicators %>%
-  plot_ly(x = ~ euexfreq, y = ~ erbmi, type = "scatter", color = ~ physical_health, 
-          frame = ~ physical_health, colors = "Paired") %>%
-  add_trace(y = fitted(bmi_exercise_model), mode = "lines") %>%
-  animation_opts(1000, easing = "linear", redraw = TRUE)
-
+par(mfrow = c(2, 2))
+plot(mlr_model)
 
 ```
 
 
+```{r}
+
+adjust_model = internal_indicators %>%
+  mutate(
+    rstand = rstandard(mlr_model)
+  )  %>%
+  filter(abs(rstand) < 2.5)
+
+mlr_adjust = lm(erbmi ~ eufastfdfrq + euexfreq, data = adjust_model)
+summary(mlr_adjust)
+
+par(mfrow = c(2,2))
+plot(mlr_adjust)
 
 
-
-
-
-
-
-
+```
 
 
 
