@@ -40,6 +40,10 @@ desc_eathealth = raw_eathealth %>%
                                            "Income > 130% of poverty threshold", "Income <= 130% of poverty threshold"))
   )
 
+desc_eathealth %>% 
+  ggplot(aes(x = erincome, y = erbmi)) + 
+  geom_violin(aes(fill = erincome), alpha = .5)
+
 ```
 
 ## B. External and Internal Indicators that affects the eating health
