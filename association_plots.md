@@ -1,42 +1,21 @@
----
-title: "association_plots"
-output: github_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,
-                      message = FALSE,
-                      warning = FALSE,
-                      fig.height = 12, fig.width = 16)
-
-library(flexdashboard)
-library(tidyverse)
-library(dplyr)
-library(plotly)
-theme_set(theme_minimal() + theme(legend.position = "bottom"))
-options(
-  ggplot2.continuous.colour = "viridis",
-  ggplot2.continuous.fill = "viridis"
-)
-scale_colour_discrete = scale_colour_viridis_d
-scale_fill_discrete = scale_fill_viridis_d
-```
+association\_plots
+================
 
 # the association between external factors External:
-- Income + BMI (ERINCOME + ERBMI) - plot; 
+
+  - Income + BMI (ERINCOME + ERBMI) - plot;
 
 data cleaning
-```{r}
+
+``` r
 raw_eathealth = read.csv("ehresp_2014.csv") %>%
   mutate(
     tucaseid = as.factor(tucaseid)
   ) %>%
   select(tucaseid, starts_with(c("er", "eu")), -erhhch)
-
 ```
 
-
-```{r}
+``` r
 external_indicators_two = raw_eathealth %>%
   select(erbmi, eugenhth, erincome, eustores) %>%
   filter_all(all_vars(. > 0)) %>%
@@ -51,16 +30,19 @@ external_indicators_two = raw_eathealth %>%
   )%>%
 rename("bmi"="erbmi", "income"="erincome","place_get_groceries" ="eustores")
 ```
-#income and bmi
 
-```{r}
+\#income and bmi
+
+``` r
 plot_inc_bmi_one=
 external_indicators_two %>%
 ggplot(aes(x=bmi,fill = income))+geom_density(alpha=0.5)+facet_grid(income~.)+scale_x_continuous( breaks = seq(10,60,3),limits =c(10,60))+labs( title = "Distribution of BMI for different income", x = "BMI", y="Density")+theme(legend.position = "bottom",panel.spacing = unit(0.5, "lines"))+scale_fill_manual(values=c("#6495ED","#8FB78F","#56B4E9","66cc99","#FF8754"))
 plot_inc_bmi_one
 ```
 
-```{r}
+![](association_plots_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+``` r
 plot_inc_bmi_two=
 external_indicators_two %>%
 ggplot(aes(x=bmi,fill = income)) +geom_histogram(position = "dodge", binwidth = 10)+scale_fill_manual(values=c("#6495ED","#8FB78F","#56B4E9","#66cc99","#FF8754"))+scale_x_continuous( breaks = seq(10,60,3),limits =c(10,60))+labs( title = "Distribution of BMI for different income", x = "BMI", y="Count")+theme(legend.position="bottom",legend.direction="vertical", plot.title = element_text(vjust = 3), panel.spacing = unit(0.5, "lines"))
@@ -68,18 +50,20 @@ ggplot(aes(x=bmi,fill = income)) +geom_histogram(position = "dodge", binwidth = 
 plot_inc_bmi_two
 ```
 
-#- Groceries + BMI (EUSTORES + ERBMI) - Plot
+![](association_plots_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
+\#- Groceries + BMI (EUSTORES + ERBMI) - Plot
 
-
-```{r}
+``` r
 plot_stor_bmi_one=
 external_indicators_two %>%
 ggplot(aes(x=bmi,fill = place_get_groceries))+geom_density(alpha=0.5)+facet_grid(place_get_groceries~.)+scale_x_continuous( breaks = seq(10,60,3),limits =c(10,60))+labs( title = "Distribution of BMI for different places get groceries", x = "BMI", y="Density")+theme(legend.position = "bottom", plot.title = element_text(vjust = 5),panel.spacing = unit(1, "lines"))+scale_fill_manual(values=c("#6495ED","#8FB78F","#56B4E9","66cc99","#FF8754"))
 plot_stor_bmi_one
 ```
 
-```{r}
+![](association_plots_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+``` r
 plot_stor_bmi_two=
 external_indicators_two %>%
 ggplot(aes(x=bmi,fill = place_get_groceries)) +geom_histogram(position = "dodge", binwidth = 10)+scale_fill_manual(values=c("#6495ED","#8FB78F","#56B4E9","#66cc99","#FF8754"))+scale_x_continuous( breaks = seq(10,60,3),limits =c(10,60))+labs( title = "Distribution of BMI for different places get groceries ", x = "BMI", y="Count")+theme(legend.position="bottom",legend.direction="vertical", plot.title = element_text(vjust = 3),panel.spacing = unit(1.5, "lines"))
@@ -87,7 +71,6 @@ ggplot(aes(x=bmi,fill = place_get_groceries)) +geom_histogram(position = "dodge"
 plot_stor_bmi_two
 ```
 
+![](association_plots_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
-#household conditions
-
-
+\#household conditions
