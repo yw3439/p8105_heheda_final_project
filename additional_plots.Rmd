@@ -84,3 +84,14 @@ desc_eathealth %>%
   geom_violin(aes(fill = erincome), alpha = .5)
 ```
 
+```{r}
+fit = lm(erbmi ~ physical_health, data = external_indicators)
+
+fit %>% 
+  broom::tidy() %>% 
+  select(term, estimate, p.value) %>% 
+  mutate(term = str_replace(term, "^physical_health", "Physical Health: ")) %>% 
+  knitr::kable(digits = 3)
+```
+
+normal weight (<25 kg/m2), overweight (25–29 kg/m2), or obese (≥30 kg/m2)
