@@ -1,36 +1,19 @@
----
-title: "data_analysis"
-author: "Qetsiyah Wang"
-date: "11/25/2020"
-output: github_document
----
+basic plot
+================
+Shane
+2020-12-04
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,
-                      message = FALSE,
-                      warning = FALSE,
-                      fig.height = 6, fig.width = 8)
+# Basic
 
-library(tidyverse)
-library(dplyr)
-library(plotly)
-```
-
-
-# Tidy Dataset
-```{r}
-
+``` r
 raw_eathealth = read.csv("ehresp_2014.csv") %>%
   mutate(
     tucaseid = as.factor(tucaseid)
   ) %>%
   select(tucaseid, starts_with(c("er", "eu")), -erhhch)
-
 ```
 
-## A. Descriptive Statistics
-```{r}
-
+``` r
 desc_eathealth = raw_eathealth %>%
   select(erbmi, euwgt, euhgt, erincome) %>%
   filter_all(all_vars(. > 0)) %>%
@@ -39,12 +22,9 @@ desc_eathealth = raw_eathealth %>%
                                            "130% < Income < 185% of poverty threshold",
                                            "Income > 130% of poverty threshold", "Income <= 130% of poverty threshold"))
   )
-
 ```
 
-## B. External and Internal Indicators that affects the eating health
-```{r}
-
+``` r
 external_indicators = raw_eathealth %>%
   select(erbmi, eugenhth, erincome, eustores) %>%
   filter_all(all_vars(. > 0)) %>%
@@ -64,20 +44,14 @@ internal_indicators = raw_eathealth %>%
   rename("physical_health" = "eugenhth") %>%
   mutate(
     physical_health = factor(physical_health, labels = c("Excellent", "Very Good", "Good", "Fair", "Poor")))
-
 ```
 
-## C. Hypothesis Testing between eating
-```{r}
+# Add-ons
 
-prim_sec_eat = raw_eathealth %>%
-  select(erbmi, ertpreat, ertseat) %>%
-  filter_all(all_vars(. > 0))
-
-
+``` r
+desc_eathealth %>% 
+  ggplot(aes(x = erincome, y = erbmi)) + 
+  geom_violin(aes(fill = erincome), alpha = .5)
 ```
 
-
-
-
-
+<img src="additional_plots_files/figure-gfm/unnamed-chunk-4-1.png" width="90%" />

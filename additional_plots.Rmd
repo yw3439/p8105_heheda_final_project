@@ -1,36 +1,46 @@
 ---
-title: "data_analysis"
-author: "Qetsiyah Wang"
-date: "11/25/2020"
+title: "basic plot"
+author: "Shane"
+date: '`r format(Sys.time(), "%Y-%m-%d")`'
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,
-                      message = FALSE,
-                      warning = FALSE,
-                      fig.height = 6, fig.width = 8)
-
 library(tidyverse)
-library(dplyr)
-library(plotly)
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 
 
-# Tidy Dataset
-```{r}
 
+# Basic
+```{r}
 raw_eathealth = read.csv("ehresp_2014.csv") %>%
   mutate(
     tucaseid = as.factor(tucaseid)
   ) %>%
   select(tucaseid, starts_with(c("er", "eu")), -erhhch)
-
 ```
 
-## A. Descriptive Statistics
 ```{r}
-
 desc_eathealth = raw_eathealth %>%
   select(erbmi, euwgt, euhgt, erincome) %>%
   filter_all(all_vars(. > 0)) %>%
@@ -39,12 +49,9 @@ desc_eathealth = raw_eathealth %>%
                                            "130% < Income < 185% of poverty threshold",
                                            "Income > 130% of poverty threshold", "Income <= 130% of poverty threshold"))
   )
-
 ```
 
-## B. External and Internal Indicators that affects the eating health
 ```{r}
-
 external_indicators = raw_eathealth %>%
   select(erbmi, eugenhth, erincome, eustores) %>%
   filter_all(all_vars(. > 0)) %>%
@@ -67,17 +74,13 @@ internal_indicators = raw_eathealth %>%
 
 ```
 
-## C. Hypothesis Testing between eating
+
+
+# Add-ons
+
 ```{r}
-
-prim_sec_eat = raw_eathealth %>%
-  select(erbmi, ertpreat, ertseat) %>%
-  filter_all(all_vars(. > 0))
-
-
+desc_eathealth %>% 
+  ggplot(aes(x = erincome, y = erbmi)) + 
+  geom_violin(aes(fill = erincome), alpha = .5)
 ```
-
-
-
-
 
