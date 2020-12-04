@@ -1,6 +1,5 @@
 ---
 title: "basic plot"
-author: "Shane"
 date: '`r format(Sys.time(), "%Y-%m-%d")`'
 output: github_document
 editor_options: 
@@ -9,6 +8,7 @@ editor_options:
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(modelr)
 
 knitr::opts_chunk$set(
 	echo = TRUE,
@@ -92,6 +92,10 @@ fit %>%
   select(term, estimate, p.value) %>% 
   mutate(term = str_replace(term, "^physical_health", "Physical Health: ")) %>% 
   knitr::kable(digits = 3)
+
+external_indicators %>% 
+  ggplot(aes(x = physical_health, y = erbmi)) + 
+  geom_violin(aes(fill = physical_health), alpha = .5)
 ```
 
 normal weight (<25 kg/m2), overweight (25–29 kg/m2), or obese (≥30 kg/m2)

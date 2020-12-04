@@ -1,6 +1,5 @@
 basic plot
 ================
-Shane
 2020-12-04
 
 # Basic
@@ -73,6 +72,14 @@ fit %>%
 | Physical Health: Good      |    4.254 |       0 |
 | Physical Health: Fair      |    5.891 |       0 |
 | Physical Health: Poor      |    5.697 |       0 |
+
+``` r
+external_indicators %>% 
+  ggplot(aes(x = physical_health, y = erbmi)) + 
+  geom_violin(aes(fill = physical_health), alpha = .5)
+```
+
+<img src="additional_plots_files/figure-gfm/unnamed-chunk-5-1.png" width="90%" />
 
 normal weight (\<25 kg/m2), overweight (25–29 kg/m2), or obese (≥30
 kg/m2)
