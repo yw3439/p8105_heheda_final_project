@@ -1,0 +1,135 @@
+---
+title: "Classification Report"
+author: "Group Heheda"
+date: "12/5/2020"
+output: html_document
+---
+
+Classification Report for Eating Health and Module
+
+# Introduction
+
+  Nowadays, as the socioeconomoic level of people' lives develops, more and more attention are paid at enhancing personal health and lifestyles. Eating health, as an indispensable component of individual's biological maintainence, plays a vital role in strengthening personal immunity and preventing chronic diseases, including regular eating habits and nutritional diets. Addressed in "Eating and Health Module" (2019, Economic Research Service), eating patterns are strongly affected by people's economic status and behaviors, including household income, engagements in physical activities, food preparation styles, accessibilities to grocery stores, and etc. From the aspect of public health and policy, understanding how these indicators affect personal eating health can assist the government to develop effective and efficient food and nutrition assistance programs, increasing stable and harmonized relationship between people and society. This project, starting from these beneficial standspoint, explores impacts of  different indicators on personal eating health.
+  
+# Data
+
+## Dataset Information
+  The dataset is obtained and downloaded from Economic Research Service of United States Department of Agriculture, named "Eating and Health Module". The dataset is case-specific repsondent file, including general personal biolgical information (height, weight), household information (income, engaged government assistance programs), eating habits (fast food consumption, drink habits, food preparation), and physcial activities of repsondents. The whole data collection was conducted by Questionnaire and Survey, based on answers of voluntary respondents. We mainly started with exploring sample selection of repsondents via several descriptive statistics on their general health information. Then we analyzed associations or distributions of internal or external indicators for understanding their impacts on personal eating health by using persoanl BMI value as the parameter, including accessibilities of grocery stores, conditions of household income, frequency of fast food consumptions and engagements of physical activities. Analysis would include different association plots and multi-linear regression model. We aso established the hypothesis testing for measuring similarity or difference resided between primary and secondary eating behaviors of respondents.
+
+```{r, include=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+raw_eathealth = read_csv("ehresp_2014.csv")
+```
+## Tidy Process
+  The raw dataset contains `r nrow(raw_eathealth)` observations and `r ncol(raw_eathealth)` variables. We selected 10 variables for our project. Variables consists of categorical variables, logical variables and continuous with the validation rule of reporting positive or specified positive value. However, because the dataset is totally based on willingness of voluntary respondent via Questionnaire, there are a large amount of invalid data entries, like negative values as the repsondent was not willing to answer certain questions. Also, for multiple continous variables, like frequency of fast food consumptions or frequency of exercises, data mainly focused on certain integers, resulting that continuous variables are more likely categorical variables. 
+  
+  Because the original dataset contains lots of categorical variables, we firstly recode all categorical variable into corresponding categories following the codebook provided along with the dataset. And for excluding invalid values, the original raw dataset was tidied into desired one based on different statistical analysis. 
+
+# Statistical Analysis
+
+## Descriptive Statistics for Respondents
+
+
+
+## Impacts of Different Indicators on Eating Health
+
+
+## Multi-regression Model for BMI vs. Frequency of Fast Food Consumption and Exercises
+
+  As the rhythm of modern lifestyles expedites, fast food gradually becomes the mainstream of daily meals, mainly consists of high carbohydrates, salts, fats and low celluloses. Long term intake of fast food has been correlated to multiple chronic diseases, such as diabetes, poor nutrition and obesity. Unlike fast food consumption, exercise plays a key role in maintaining and strengthening good physical health. Generally, both two indicators would show different kinds of associations with personal BMI in magnitudes and signs.We built a multi-regression model for exploring association between BMI and frequency of fast food consumption with incorporation of frequency of exercises.
+
+```{r, echo = FALSE, fig.height=8, fig.width=10, warning=FALSE, message=FALSE}
+library(plotly)
+raw_eathealth = read_csv("ehresp_2014.csv") %>%
+  mutate(
+    tucaseid = as.factor(tucaseid)
+  ) %>%
+  select(tucaseid, starts_with(c("er", "eu")), -erhhch)
+
+internal_indicators = raw_eathealth %>%
+  select(erbmi, eufastfdfrq, euexfreq) %>%
+  filter_all(all_vars(. > 0))
+
+fig_data = internal_indicators %>%
+  pivot_longer(
+    eufastfdfrq : euexfreq,
+    names_to = "indicator",
+    values_to = "value"
+  ) %>%
+  mutate(
+    indicator = recode(indicator, "eufastfdfrq" = "Fast Food Consumption",
+                       "euexfreq" = "Exercise"),
+    indicator = factor(indicator, levels = c("Fast Food Consumption", "Exercise")))
+
+mlr_plot = fig_data %>%
+  lm(erbmi ~ value * indicator, data = .) 
+  
+fig_data %>%
+  mutate(
+    fit_value = fitted(mlr_plot)
+  ) %>%
+  plot_ly(x = ~ value, y = ~erbmi, frame = ~ indicator, color = ~ indicator, type = "scatter") %>%
+  add_lines(x = ~ value, y = ~ fit_value, frame = ~ indicator, mode = "lines") %>%
+  layout(title = "Scatter plots of BMI vs. Frequency of Fast Food Consumption and Exercise",
+         xaxis = list(title = "Frequency"), yaxis = list(title = "BMI")) %>%
+  animation_opts(2500, easing = "linear", redraw = T) %>%
+  animation_slider(hide = F)
+
+summ_mlr_plot = summary(mlr_plot)
+
+```
+  
+  From the scatter plot of BMI vs. Frequency of Fast Food Consumption, originally continuous variables are shown approximately to categorical variables, which might be caused by the way of data collection: Questionnaire. Generally, the regression line of BMI vs. frequency of fast food consumption is positive. As the consumption of fast food increases, the value of BMI would also increase, indicating that fast food consumption relates to decreased eating health. The regression line of BMI vs. frequency of exercise is negative, which means higher frequency of exercise would result in lower BMI. However, according to the R-squared of `r summ_mlr_plot[["r.squared"]]`, the model need further adjustment for detecting associations between BMI and two kinds of frequencies. So, multi-linear regression model incorporating both indicators was built.
+```{r, echo=FALSE, fig.height=8, fig.width=10, warning=FALSE, message=FALSE}
+
+mlr_model = lm(erbmi ~ eufastfdfrq + euexfreq, data = internal_indicators)
+summ_mlr = summary(mlr_model)
+
+par(mfrow = c(2, 2))
+plot(mlr_model)
+
+```  
+  
+  Multiregression model of BMI vs. Frequency of Fast Food Consumption and Exercise showed that the estimated coefficient for fast food consumption is `r round(mlr_model[["coefficients"]][["eufastfdfrq"]], 4)` with p.value of `r round(summ_mlr[["coefficients"]][11], 4)`and for exercise is `r round(mlr_model[["coefficients"]][["euexfreq"]], 4)` with p.value of `r summ_mlr[["coefficients"]][12]`. R-squared: `r round(summ_mlr[["r.squared"]], 4)` 
+  Both p.value prove the statistical significance of two coefficients in the multiregression model. Low R-squared value allows more residual and outlier tests for the model. Obviously, residuals for the model are deviated from normal distribution. Both scatter plots and Leverage plots show that there are multiple outliers resided in the model, affecting the fitted model for the regression of BMI vs. frequency of food consumption and exercise.
+  Adjustments are performed by controlling existed outliers.
+
+## Adjustments for the multiregression model
+```{r, echo=FALSE,  fig.height=8, fig.width=10, warning=FALSE, message=FALSE}
+adjust_model = internal_indicators %>%
+  mutate(
+    rstand = rstandard(mlr_model)
+  ) 
+
+outliers = adjust_model %>%
+  filter(abs(rstand) > 2.5)
+
+mlr_adjust = adjust_model %>%
+  filter(abs(rstand) < 2.5) %>%
+  lm(erbmi ~ eufastfdfrq + euexfreq, data = .)
+mlr_adjust_summ = summary(mlr_adjust)
+
+par(mfrow = c(2,2))
+plot(mlr_adjust)
+```
+
+  `r nrow(outliers)` outliers are excluded by "internally studentized residuals".  Comparing with unadjusted model, adjusted multiregression model with exclusion of outliers showed lower estimated slope of `r round(mlr_adjust[["coefficients"]][["eufastfdfrq"]], 4)`for linear regression BMI vs. Frequency of food consumption with higher statistical significance proved from lower p.value of `r round(mlr_adjust_summ[["coefficients"]][11], 4)`. QQ plot presented that exclusion of outliers made the residuals more approaching to normal distribution. Regression of BMI vs. exercise presented higher estimated slope of `r mlr_adjust[["coefficients"]][["euexfreq"]]`. 
+  R-squared: `r round(mlr_adjust_summ[["r.squared"]], 4)` with increment of `r round(mlr_adjust_summ[["r.squared"]], 4) - round(summ_mlr[["r.squared"]], 4)`
+  Adjusted R-squared: `r round(mlr_adjust_summ[["adj.r.squared"]], 4)` with increment of `r round(mlr_adjust_summ[["adj.r.squared"]], 4) - round(summ_mlr[["adj.r.squared"]], 4)`
+  
+  In general, due to Questionnaire way used on data collection, there would be bias existed while respondents answered frequency of fast food consumption and exercises. From the multiregression model, we can conclude that exercises affects BMI in the positive way which improving personal phyiscal health as the frequency of engaging activities increases. Even though the estimated coefficient of BMI vs.Frequency of fast food consumption is only `r round(mlr_adjust[["coefficients"]][["eufastfdfrq"]], 4)`, it is consistent with what we expected before establishing the model that the physical health will decreases as the consumption of fast food increases. In other words, eating health is negatively impacted by fast food consumption but positively impacted by exercises.
+  
+## Hypothesis Testing
+
+## Conclusion
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
