@@ -107,10 +107,19 @@ mlr_adjust_summ = summary(mlr_adjust)
 
 ```
 
-  `r nrow(outliers)` outliers are excluded by "internally studentized residuals". Comparing with unadjusted model, adjusted multiregression model with exclusion of outliers showed lower estimated slope of `r round(mlr_adjust[["coefficients"]][["eufastfdfrq"]], 4)`for linear regression BMI vs. Frequency of food consumption with higher statistical significance proved from lower p.value of `r round(mlr_adjust_summ[["coefficients"]][11], 4)`. Regression of BMI vs. exercise presented higher estimated slope of `r mlr_adjust[["coefficients"]][["euexfreq"]]`. R-squared: `r round(mlr_adjust_summ[["r.squared"]], 4)` with increment of `r round(mlr_adjust_summ[["r.squared"]], 4) - round(summ_mlr[["r.squared"]], 4)`, Adjusted R-squared: `r round(mlr_adjust_summ[["adj.r.squared"]], 4)` with increment of `r round(mlr_adjust_summ[["adj.r.squared"]], 4) - round(summ_mlr[["adj.r.squared"]], 4)`
+  `r nrow(outliers)` outliers are excluded by "internally studentized residuals".  Comparing with unadjusted model, adjusted multiregression model with exclusion of outliers showed lower estimated slope of `r round(mlr_adjust[["coefficients"]][["eufastfdfrq"]], 4)`for linear regression BMI vs. Frequency of food consumption with higher statistical significance proved from lower p.value of `r round(mlr_adjust_summ[["coefficients"]][11], 4)`. QQ plot presented that exclusion of outliers made the residuals more approaching to normal distribution. Regression of BMI vs. exercise presented higher estimated slope of `r mlr_adjust[["coefficients"]][["euexfreq"]]`. 
+  R-squared: `r round(mlr_adjust_summ[["r.squared"]], 4)` with increment of `r round(mlr_adjust_summ[["r.squared"]], 4) - round(summ_mlr[["r.squared"]], 4)`
+  Adjusted R-squared: `r round(mlr_adjust_summ[["adj.r.squared"]], 4)` with increment of `r round(mlr_adjust_summ[["adj.r.squared"]], 4) - round(summ_mlr[["adj.r.squared"]], 4)`
   
 ```{r}
 par(mfrow = c(2,2))
 plot(mlr_adjust)
 ```
   
+
+
+
+
+
+
+
