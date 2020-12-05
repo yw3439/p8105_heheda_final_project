@@ -8,11 +8,13 @@ knitr::opts_chunk$set(echo = TRUE,
                       message = FALSE,
                       warning = FALSE,
                       fig.height = 12, fig.width = 16)
-
+install.packages("plotrix")
+library(ggplot2)
 library(flexdashboard)
 library(tidyverse)
 library(dplyr)
 library(plotly)
+library(plotrix)
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 options(
@@ -50,6 +52,62 @@ external_indicators_two = raw_eathealth %>%
        )%>%
 rename("bmi"="erbmi", "income"="erincome","place_get_groceries" ="eustores","change_in_work_of_sponsor" = "erspemch")
 ```
+#categorize BMI
+```{r}
+external_category_crude =
+raw_eathealth %>%
+  select(erbmi, eugenhth, erincome, eustores,erspemch) %>%
+  filter_all(all_vars(. > 0)) %>%
+  rename("physical_health" = "eugenhth") %>%
+  mutate(
+    physical_health = factor(physical_health, labels = c("Excellent", "Very Good", "Good", "Fair", "Poor")),
+     erincome = factor(erincome, labels = c(">185% ", "<=185% ", "130%-185% ", ">130% ", "<=130%")),
+    eustores = factor(eustores, labels = c("Grocery Store", "Supercenter", "Warehouse Club", 
+                                           "Drugstore or Convenience Store", "Some Other Place")),
+    erspemch = factor(erspemch, labels = c("Partner's work time decrease", "Partner's work time increase", "Partner lose job","Partner find job", "Not change" ))
+       )%>%
+rename("bmi"="erbmi", "income_threhold"="erincome","place_get_groceries" ="eustores","change_in_work_of_spouse" = "erspemch") %>%
+mutate(bmi_new =cut(bmi, breaks=c(-Inf,18.5, 25, 30, Inf), labels=c("Underweight","Normal","Overweight","Obese")))
+```
+
+
+
+# Plot for Distribution by Income and BMI
+```{r}
+counts <- table(external_category_crude$bmi_new, external_category_crude$income)
+barplot(counts, main="Distribution by Income and BMI",
+  xlab="Income level", col=c("#8FB78F","#2A6E93","#6495ED","#ff8754"),
+  legend = rownames(counts),beside=TRUE)
+```
+
+
+
+# Density Plot for Distribution by Grocery store and BMI
+```{r}
+plot_stor_bmi_one=
+external_indicators_two %>%
+ggplot(aes(x=bmi,fill = place_get_groceries))+geom_density(alpha=0.5)+facet_grid(place_get_groceries~.)+scale_x_continuous( breaks = seq(10,60,3),limits =c(10,60))+labs( title = "Distribution of BMI for different places get groceries", x = "BMI", y="Density")+theme(legend.position = "bottom", plot.title = element_text(vjust = 5),panel.spacing = unit(1, "lines"))+scale_fill_manual(values=c("#6495ED","#8FB78F","#56B4E9","66cc99","#FF8754"))
+plot_stor_bmi_one
+```
+
+
+# Plot for Distribution by household conditions and BMI
+```{r}
+external_categ_house = external_category_crude %>%
+group_by(bmi_new,change_in_work_of_spouse)%>%
+mutate(count_house=n())%>%
+count(bmi_new)
+  
+```
+
+```{r}
+house=
+ggplot(external_categ_house) + geom_col(aes(x = 1, y = n, fill =bmi_new), position = "fill") +coord_polar(theta = "y") + facet_wrap(~ change_in_work_of_spouse) 
+house
+```
+
+
+
 
 #income and bmi
 
@@ -73,20 +131,6 @@ plot_inc_bmi_two
 
 #- Groceries + BMI (EUSTORES + ERBMI) - Plot
 
-```{r}
-plot_stor_bmi_one=
-external_indicators_two %>%
-ggplot(aes(x=bmi,fill = place_get_groceries))+geom_density(alpha=0.5)+facet_grid(place_get_groceries~.)+scale_x_continuous( breaks = seq(10,60,3),limits =c(10,60))+labs( title = "Distribution of BMI for different places get groceries", x = "BMI", y="Density")+theme(legend.position = "bottom", plot.title = element_text(vjust = 5),panel.spacing = unit(1, "lines"))+scale_fill_manual(values=c("#6495ED","#8FB78F","#56B4E9","66cc99","#FF8754"))
-plot_stor_bmi_one
-```
-
-```{r}
-plot_stor_bmi_two=
-external_indicators_two %>%
-ggplot(aes(x=bmi,fill = place_get_groceries)) +geom_histogram(position = "dodge", binwidth = 10)+scale_fill_manual(values=c("#6495ED","#8FB78F","#56B4E9","#66cc99","#FF8754"))+scale_x_continuous( breaks = seq(10,60,3),limits =c(10,60))+labs( title = "Distribution of BMI for different places get groceries ", x = "BMI", y="Count")+theme(legend.position="bottom",legend.direction="vertical", plot.title = element_text(vjust = 3),panel.spacing = unit(1.5, "lines"))
-
-plot_stor_bmi_two
-```
 
 #household conditions+BMI
 

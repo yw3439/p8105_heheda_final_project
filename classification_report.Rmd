@@ -14,7 +14,7 @@ Classification Report for Eating Health and Module
 # Data
 
 ## Dataset Information
-  The dataset is obtained and downloaded from Economic Research Service of United States Department of Agriculture, named "Eating and Health Module". The dataset is case-specific repsondent file, including general personal biolgical information (height, weight), household information (income, engaged government assistance programs), eating habits (fast food consumption, drink habits, food preparation), and physcial activities of repsondents. The whole data collection was conducted by Questionnaire and Survey, based on answers of voluntary respondents. We mainly started with exploring sample selection of repsondents via several descriptive statistics on their general health information. Then we analyzed associations or distributions of internal or external indicators for understanding their impacts on personal eating health by using persoanl BMI value as the parameter, including accessibilities of grocery stores, conditions of household income, frequency of fast food consumptions and engagements of physical activities. Analysis would include different association plots and multi-linear regression model. We aso established the hypothesis testing for measuring similarity or difference resided between primary and secondary eating behaviors of respondents.
+  The dataset is obtained and downloaded from Economic Research Service of United States Department of Agriculture, named "Eating and Health Module". The dataset is case-specific repsondent file, including general personal biolgical information (height, weight), household information (income, engaged government assistance programs), eating habits (fast food consumption, drink habits, food preparation), and physcial activities of repsondents. The whole data collection was conducted by Questionnaire and Survey, based on answers of voluntary respondents. We mainly started with exploring sample selection of repsondents via several descriptive statistics on their general health information. Then we analyzed associations or distributions of internal or external indicators for understanding their impacts on personal eating health by using persoanl BMI value as the parameter, including accessibilities of grocery stores, conditions of household income, frequency of fast food consumptions and engagements of physical activities. Analysis would include different association plots and multi-linear regression model. We also established the hypothesis testing for measuring similarity or difference resided between primary and secondary eating behaviors of respondents.
 
 ```{r, include=FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -28,10 +28,134 @@ raw_eathealth = read_csv("ehresp_2014.csv")
 # Statistical Analysis
 
 ## Descriptive Statistics for Respondents
+Income.
+```{r}
+ehresp %>%
+   filter(erincome > 0) %>%
+   group_by(erincome) %>%
+   summarise(n_distinct(tucaseid)) %>%
+   mutate(
+      income_level = case_when(
+         erincome == 1 ~ "Income > 185% of poverty threshold", 
+         erincome == 2 ~ "Income <= 185% of poverty threshold", 
+         erincome == 3 ~ "130% of poverty threshold < Income < 185% of poverty threshold", 
+         erincome == 4 ~ "Income > 130% of poverty threshold",
+         erincome == 5 ~ "Income <= 130% of poverty threshold"))
+```
 
-
+BMI, height in inches, and weight in pounds.
+```{r}
+ehresp %>%
+   select(erbmi, euhgt, euwgt) %>%
+   filter(erbmi > 0, euhgt > 0, euwgt > 0) %>%
+   summary() %>%
+   format(scientific = F, digits = 2)
+```
 
 ## Impacts of Different Indicators on Eating Health
+Here in this section, want to examine the asscociation between external factors and BMI.Sometimes we are intersted in the category that the BMI is refer to. .According to the WHO BMI standard, we categorize BMI into four categories: "Underweight","Normal","Overweight","Obese", then we want to comare the proportion of each BMI status among indicator categories.Therefore, according to distribution of the data, for indicatorsincome and household conditions, and we use categorized BMI
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE,
+                      fig.height = 12, fig.width = 16)
+install.packages("plotrix")
+library(ggplot2)
+library(flexdashboard)
+library(tidyverse)
+library(dplyr)
+library(plotly)
+library(plotrix)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+```{r include=FALSE}
+raw_eathealth_2 = read.csv("ehresp_2014.csv") %>%
+  mutate(
+    tucaseid = as.factor(tucaseid)
+  ) %>%
+  select(tucaseid, starts_with(c("er", "eu")), -erhhch)
+
+```
+
+
+```{r include=FALSE}
+external_indicators_two = raw_eathealth_2 %>%
+  select(erbmi, eugenhth, erincome, eustores,erspemch) %>%
+  filter_all(all_vars(. > 0)) %>%
+  rename("physical_health" = "eugenhth") %>%
+  mutate(
+    physical_health = factor(physical_health, labels = c("Excellent", "Very Good", "Good", "Fair", "Poor")),
+     erincome = factor(erincome, labels = c("Income > 185% of poverty threhold", "Income <= 185% of poverty threshold", "130% < Income < 185% of poverty threshold", "Income > 130% of poverty threshold", "Income <= 130% of poverty threshold")),
+    eustores = factor(eustores, labels = c("Grocery Store", "Supercenter", "Warehouse Club", 
+                                           "Drugstore or Convenience Store", "Some Other Place")),
+    erspemch = factor(erspemch, labels = c("Partner's work time decrease", "Partner's work time increase", "Partner lose job","Partner find job", "Not change" ))
+       )%>%
+rename("bmi"="erbmi", "income"="erincome","place_get_groceries" ="eustores","change_in_work_of_sponsor" = "erspemch")
+```
+#categorize BMI
+```{r}
+external_category_crude =
+raw_eathealth_2 %>%
+  select(erbmi, eugenhth, erincome, eustores,erspemch) %>%
+  filter_all(all_vars(. > 0)) %>%
+  rename("physical_health" = "eugenhth") %>%
+  mutate(
+    physical_health = factor(physical_health, labels = c("Excellent", "Very Good", "Good", "Fair", "Poor")),
+     erincome = factor(erincome, labels = c(">185% ", "<=185% ", "130%-185% ", ">130% ", "<=130%")),
+    eustores = factor(eustores, labels = c("Grocery Store", "Supercenter", "Warehouse Club", 
+                                           "Drugstore or Convenience Store", "Some Other Place")),
+    erspemch = factor(erspemch, labels = c("Partner's work time decrease", "Partner's work time increase", "Partner lose job","Partner find job", "Not change" ))
+       )%>%
+rename("bmi"="erbmi", "income_threhold"="erincome","place_get_groceries" ="eustores","change_in_work_of_spouse" = "erspemch") %>%
+mutate(bmi_new =cut(bmi, breaks=c(-Inf,18.5, 25, 30, Inf), labels=c("Underweight","Normal","Overweight","Obese")))
+```
+
+# Plot for Distribution by Income and BMI
+```{r}
+counts <- table(external_category_crude$bmi_new, external_category_crude$income)
+barplot(counts, main="Distribution by Income and BMI",
+  xlab="Income level", col=c("#8FB78F","#2A6E93","#6495ED","#ff8754"),
+  legend = rownames(counts),beside=TRUE)
+```
+
+From the plot, we could see that the higher-income population has larger proportion of normal weighted population and lower proprotion of Obese population than in the lower-income groups. One thing worth to mention is  that the proportion of obese populaion is even higher than that of normal-weighted person among the lowest income group, which give us public health implications that we need to consider the low-income population as vulerable population for obesity.
+
+#Household(Spouse working)conditions
+
+# Plot for Distribution by spouse conditions and BMI
+```{r}
+external_categ_house = external_category_crude %>%
+group_by(bmi_new,change_in_work_of_spouse)%>%
+mutate(count_house=n())%>%
+count(bmi_new)
+  
+```
+
+```{r}
+house=
+ggplot(external_categ_house) + geom_col(aes(x = 1, y = n, fill =bmi_new), position = "fill") +coord_polar(theta = "y") + facet_wrap(~ change_in_work_of_spouse) 
+house
+```
+We are interested in this area is because we concern whether spouse's working status would actually influence the health status. Interestingly, the proportion of normal population among partner's working time increase are approximaterly the same as that among partner's lose job. Also, the proportion of normal weightes population among partner's lose job a are significantly higher than that among partner's find  job.In addition, we could not see a trend of increase or decrease of the proportion of neither normal weighted nor obese population among these five household conditions. Therefore, it seems like spouse's working status will not significantly influence BMI.
+
+# Plot for preferenece in grocery store 
+```{r}
+plot_stor_bmi_one=
+external_indicators_two %>%
+ggplot(aes(x=bmi,fill = place_get_groceries))+geom_density(alpha=0.5)+facet_grid(place_get_groceries~.)+scale_x_continuous( breaks = seq(10,60,3),limits =c(10,60))+labs( title = "Distribution of BMI for different places get groceries", x = "BMI", y="Density")+theme(legend.position = "bottom", plot.title = element_text(vjust = 5),panel.spacing = unit(1, "lines"))+scale_fill_manual(values=c("#6495ED","#8FB78F","#56B4E9","66cc99","#FF8754"))
+plot_stor_bmi_one
+```
+From the density plot, we could se that the distribution for the BMI are approximatelu the same among people who shops in Crocerystore, Supercenter and warehouse club. However, for people who Consume products in Drugstore or convenience store, the BMI are relative higher that shoppers with other shopping-preferences, one thing need to mention that people who shoppers in other places looks relatively healthier, we could inverstigate where they shop or why they made this decision, and explore this in the future. 
+
 
 
 ## Multi-regression Model for BMI vs. Frequency of Fast Food Consumption and Exercises
@@ -120,7 +244,37 @@ plot(mlr_adjust)
   In general, due to Questionnaire way used on data collection, there would be bias existed while respondents answered frequency of fast food consumption and exercises. From the multiregression model, we can conclude that exercises affects BMI in the positive way which improving personal phyiscal health as the frequency of engaging activities increases. Even though the estimated coefficient of BMI vs.Frequency of fast food consumption is only `r round(mlr_adjust[["coefficients"]][["eufastfdfrq"]], 4)`, it is consistent with what we expected before establishing the model that the physical health will decreases as the consumption of fast food increases. In other words, eating health is negatively impacted by fast food consumption but positively impacted by exercises.
   
 ## Hypothesis Testing
+We want to test whether respondents who spent longer time in primary eating or drinking would also be those who spent longer time in secondary eating.
 
+H0: mean primary eating time = mean secondary eating time.
+H1: mean primary eating time =\ mean secondary eating time.
+
+Statistical method: paired t-test. 
+```{r}
+library(tidyverse)
+library(dplyr)
+library(plotly)
+library(goftest)
+prim_sec_eat = raw_eathealth %>%
+  select(erbmi, ertpreat, ertseat) %>%
+  filter_all(all_vars(. > 0))
+
+prim_sec_eat =
+  prim_sec_eat%>%
+  mutate(
+    diff_time = ertpreat - ertseat,
+    diff_time_num = as.numeric(diff_time)
+  )
+
+
+ad.test(prim_sec_eat$diff_time_num)
+``` 
+According to Anderson-Darling normality test, since p-value is smaller than 0.05, we reject null hypothesis and conclude that the difference between primary eating time and secondary eating time is normally distributed. Therefore, we can use paired t-test.
+
+```{r}
+t.test(prim_sec_eat$ertpreat, prim_sec_eat$ertseat)
+```
+According to paired t-test, since p-value is smaller than 0.05, we reject null hypothesis and conclude that respondents do not spend same amount of time on primary eating and secondary eating. We are 95% confident that respondents spend 31 to 35 minutes longer on primary eating than on secondary eating. 
 ## Conclusion
 
 
